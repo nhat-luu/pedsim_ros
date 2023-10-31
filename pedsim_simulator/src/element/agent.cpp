@@ -1104,6 +1104,13 @@ void Agent::stopMovement() {
   seta(Ped::Tvector());
 }
 
+void Agent::stopMovement(Ped::Tvector direction) {
+  disableAllForces();
+  // set v and a to zero
+  setv(direction.normalized() / 1000);
+  seta(Ped::Tvector());
+}
+
 void Agent::adjustKeepDistanceForceDistance() {
   // This method is called while in StateListening
   // Adjust listening distance based on how many agents are listening together with this one

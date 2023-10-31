@@ -722,7 +722,7 @@ void AgentStateMachine::activateState(AgentState stateIn) {
       startTimestamp = ros::WallTime::now();
       stateMaxDuration = getRandomDuration(agent->stateTalkingBaseTime);
       agent->setWaypointPlanner(nullptr);
-      agent->stopMovement();
+      agent->stopMovement(agent->talkingToAgent->getPosition() - agent->getPosition());
       break;
     case StateTalkingAndWalking:
       startTimestamp = ros::WallTime::now();
@@ -784,7 +784,7 @@ void AgentStateMachine::activateState(AgentState stateIn) {
     case StateListening:
       agent->setWaypointPlanner(nullptr);
       if (agent->isListeningToIndividual()) {
-        agent->stopMovement();
+        agent->stopMovement(agent->listeningToAgent->getPosition() - agent->getPosition());
       } else {
         agent->enableForce("KeepDistance");
         agent->disableForce("Robot");

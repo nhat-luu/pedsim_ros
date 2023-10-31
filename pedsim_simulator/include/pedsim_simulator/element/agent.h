@@ -173,6 +173,7 @@ class Agent : public ScenarioElement, public Ped::Tagent {
   void disableAllForces();
   void resumeMovement();
   void stopMovement();
+  void stopMovement(Ped::Tvector direction);
   void adjustKeepDistanceForceDistance();
   void recordVelocity();
   void updateSubGoal();
