@@ -226,8 +226,7 @@ Ped::Tvector Ped::Tagent::socialForce() const
     // compute interaction direction t_ij
     Tvector interactionVector = lambdaImportance * velDiff + diffDirection;
     double interactionLength = interactionVector.length();
-    assert(interactionLength > 0.0);
-    Tvector interactionDirection = interactionVector / interactionLength;
+    Tvector interactionDirection = interactionVector / (interactionLength || 1);
 
     // The robots influence is computed separetly in Ped::Tagent::robotForce()
     if (other->getType() == ROBOT)
