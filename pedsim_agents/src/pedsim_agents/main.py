@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import enum
+import numpy as np
+
+import genpy
 import os
 import rospy
 import std_msgs.msg
 
+from typing import List, Dict
+import pedsim_msgs.msg
+
 from pedsim_agents.config import Topics
-from pedsim_agents.utils import NList, InputMsg, InputData
+from pedsim_agents.utils import NList, InputMsg, InputData, FeedbackDatum, World, Agenty, Objecty
 
 from pedsim_agents.pedsim_semantic import SemanticProcessor
 from pedsim_agents.pedsim_forces.pedsim_forces import PedsimForcemodel
@@ -23,12 +30,15 @@ def main():
     forcemodel = PedsimForcemodel(str(rospy.get_param("~forcemodel", "")))
 
     semantic = SemanticProcessor()
+
+    world = World()
+
     sub: rospy.Subscriber
 
     def callback(input_msg: InputMsg):
 
         if not running:
-            return;
+            return
     
         stamp = input_msg.header.stamp
 
@@ -42,9 +52,16 @@ def main():
             obstacles=NList(input_msg.obstacles)
         )
 
+        if world.agents == []:
+            world.load_stuff(input_data)
+
+        input_data = world.update_agents(input_data)
+
         feedback_data = forcemodel.calculate(input_data)
 
-        semantic_data = semantic.calculate(input_data, feedback_data)
+        feedback_data = [agent.update_force(feedback) for agent, feedback in zip(world.agents,feedback_data)]
+
+        semantic_data = semantic.calculate(input_data, feedback_data, world.agents)
 
         forcemodel.publish(stamp, feedback_data)
         semantic.publish(stamp, semantic_data)
@@ -58,6 +75,7 @@ def main():
 
         forcemodel.reset()
         semantic.reset()
+        world.reset()
 
         sub = rospy.Subscriber(
             name=Topics.INPUT,
